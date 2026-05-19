@@ -3,14 +3,15 @@ import type {ProgressInfo} from '@kessler/gemma';
 import {useEffect, useRef, useState} from 'react';
 
 export const useModel = () => {
-	const gemma = useRef<Gemma | null>(null);
+	const gemma = useRef<Gemma>();
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [progress, setProgress] = useState('loading');
-	const [error, setError] = useState<string | null>(null);
+	const [error, setError] = useState<string | undefined>(undefined);
 
 	useEffect(() => {
-		const setErrorFrom = (err: unknown) =>
-			setError(err instanceof Error ? err.message : String(err));
+		const setErrorFrom = (error_: unknown) => {
+			setError(error_ instanceof Error ? error_.message : String(error_));
+		};
 
 		const onProgress = (info: ProgressInfo) => {
 			if (info.status === 'loading') setProgress(`${info.progress ?? 0}%`);
@@ -21,21 +22,26 @@ export const useModel = () => {
 		process.on('uncaughtException', setErrorFrom);
 		process.on('unhandledRejection', setErrorFrom);
 
-		gemma.current = new Gemma({model: 'gemma-4-e2b', device: 'cpu', onProgress});
+		const g = new Gemma({
+			model: 'gemma-4-e2b',
+			device: 'cpu',
+			onProgress,
+		});
+		gemma.current = g;
 
 		(async () => {
 			try {
-				await gemma.current!.load();
+				await g.load();
 				setIsLoaded(true);
-			} catch (err) {
-				setErrorFrom(err);
+			} catch (error_: unknown) {
+				setErrorFrom(error_);
 			}
 		})();
 
 		return () => {
 			process.off('uncaughtException', setErrorFrom);
 			process.off('unhandledRejection', setErrorFrom);
-			gemma.current?.unload();
+			void gemma.current?.unload();
 		};
 	}, []);
 
