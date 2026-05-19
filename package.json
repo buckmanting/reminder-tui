@@ -1,14 +1,17 @@
 {
-	"name": "my-ink-cli",
-	"version": "0.0.0",
+	"name": "reminder-tui",
+	"version": "1.0.0",
 	"license": "MIT",
-	"bin": "dist/cli.js",
+	"bin": {
+		"reminders-tui": "dist/cli.js"
+	},
 	"type": "module",
 	"engines": {
 		"node": ">=16"
 	},
 	"scripts": {
-		"build": "vite build",
+		"build": "vite build && chmod +x dist/cli.js",
+		"prepare": "vite build && chmod +x dist/cli.js",
 		"dev": "vite build --watch",
 		"start": "vite build && node dist/cli.js",
 		"test": "prettier --check . && xo && ava"
