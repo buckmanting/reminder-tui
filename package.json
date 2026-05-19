@@ -14,7 +14,7 @@
 		"prepare": "vite build && chmod +x dist/cli.js",
 		"dev": "vite build --watch",
 		"start": "vite build && node dist/cli.js",
-		"test": "prettier --check . && xo && ava"
+		"test": "prettier --check . && xo && vitest run"
 	},
 	"files": [
 		"dist"
@@ -38,21 +38,29 @@
 		"prettier": "^2.8.7",
 		"typescript": "^6.0.3",
 		"vite": "^8.0.13",
+		"vitest": "^4.1.6",
 		"xo": "^0.53.1"
-	},
-	"ava": {
-		"environmentVariables": {
-			"NODE_NO_WARNINGS": "1"
-		},
-		"nodeArguments": [
-			"--loader=import-jsx"
-		]
 	},
 	"xo": {
 		"extends": "xo-react",
 		"prettier": true,
+		"tsconfig": "tsconfig.lint.json",
 		"rules": {
-			"react/prop-types": "off"
+			"react/prop-types": "off",
+			"unicorn/expiring-todo-comments": "off",
+			"unicorn/filename-case": [
+				"error",
+				{
+					"cases": {
+						"kebabCase": true,
+						"pascalCase": true,
+						"camelCase": true
+					}
+				}
+			],
+			"n/prefer-global/process": "off",
+			"n/file-extension-in-import": "off",
+			"@typescript-eslint/no-unsafe-call": "off"
 		}
 	},
 	"prettier": "@vdemedes/prettier-config"
