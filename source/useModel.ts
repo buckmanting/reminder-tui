@@ -6,45 +6,38 @@ export const useModel = () => {
 	const gemma = useRef<Gemma | null>(null);
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [progress, setProgress] = useState('loading');
-
-	const onProgress = (info: ProgressInfo) => {
-		setProgress(info.status);
-		if (info.status === 'loading') console.log(`${info.progress}%`);
-		if (info.status === 'ready') console.log('Model ready');
-		if (info.status === 'error') console.error(info.error);
-	};
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		gemma.current = new Gemma({
-			model: 'gemma-4-e2b',
-			onProgress,
-		});
+		const setErrorFrom = (err: unknown) =>
+			setError(err instanceof Error ? err.message : String(err));
 
-		const setup = async () => {
-			await gemma.current!.load();
-			setIsLoaded(true);
+		const onProgress = (info: ProgressInfo) => {
+			if (info.status === 'loading') setProgress(`${info.progress ?? 0}%`);
+			if (info.status === 'ready') setProgress('ready');
+			if (info.status === 'error') setError(info.error ?? 'Unknown error');
 		};
 
-		setup();
+		process.on('uncaughtException', setErrorFrom);
+		process.on('unhandledRejection', setErrorFrom);
+
+		gemma.current = new Gemma({model: 'gemma-4-e2b', device: 'cpu', onProgress});
+
+		(async () => {
+			try {
+				await gemma.current!.load();
+				setIsLoaded(true);
+			} catch (err) {
+				setErrorFrom(err);
+			}
+		})();
 
 		return () => {
-			const teardown = async () => {
-				await gemma.current?.unload();
-			};
-
-			teardown();
+			process.off('uncaughtException', setErrorFrom);
+			process.off('unhandledRejection', setErrorFrom);
+			gemma.current?.unload();
 		};
 	}, []);
 
-	const complete = async (prompt: string): Promise<string> => {
-		if (!gemma.current) throw new Error('Model not loaded');
-		return gemma.current.complete(prompt);
-	};
-
-	const stream = async function* (prompt: string): AsyncGenerator<string> {
-		if (!gemma.current) throw new Error('Model not loaded');
-		yield* gemma.current.stream(prompt);
-	};
-
-	return {stream, complete, isLoaded, progress};
+	return {gemmaRef: gemma, isLoaded, progress, error};
 };
