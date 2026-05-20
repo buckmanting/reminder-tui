@@ -6,7 +6,7 @@ export const useModel = () => {
 	const gemma = useRef<Gemma>();
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [progress, setProgress] = useState('loading');
-	const [error, setError] = useState<string | undefined>(undefined);
+	const [error, setError] = useState<string>();
 
 	useEffect(() => {
 		const setErrorFrom = (error_: unknown) => {

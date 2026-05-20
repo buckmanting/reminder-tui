@@ -1,4 +1,4 @@
-import {useEffect, useRef} from 'react';
+import {useCallback, useEffect, useRef} from 'react';
 import {Agent, maxTurns, type ToolDefinition, type Gemma} from '@kessler/gemma';
 import type {Reminder} from '../types.js';
 import {parseTags} from './useReminders.js';
@@ -57,7 +57,7 @@ export function buildTools(
 				addReminder(
 					String(args.description),
 					String(args.dueDate),
-					parseTags(args.tags as string | undefined),
+					parseTags(typeof args.tags === 'string' ? args.tags : undefined),
 				);
 				return {success: true};
 			},
@@ -145,10 +145,10 @@ export const useAgent = ({
 		});
 	}, [isLoaded]); // eslint-disable-line react-hooks/exhaustive-deps -- agent is intentionally created once when the model loads
 
-	const run = async (prompt: string) => {
+	const run = useCallback(async (prompt: string) => {
 		if (!agentRef.current) throw new Error('Agent not ready');
 		return agentRef.current.run(prompt);
-	};
+	}, []);
 
-	return {run, isReady: Boolean(agentRef.current)};
+	return {run};
 };

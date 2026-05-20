@@ -4,7 +4,7 @@ import {Box, Text} from 'ink';
 type Props = {
 	readonly output: string;
 	readonly isGenerating: boolean;
-	readonly error: string | undefined;
+	readonly error?: string;
 };
 
 export default function OutputPanel({output, isGenerating, error}: Props) {
@@ -17,7 +17,7 @@ export default function OutputPanel({output, isGenerating, error}: Props) {
 			paddingX={1}
 			overflow="hidden"
 		>
-			{output ? (
+			{output || isGenerating ? (
 				<Text>
 					{output}
 					{isGenerating ? '▋' : ''}
