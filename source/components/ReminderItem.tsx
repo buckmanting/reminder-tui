@@ -9,13 +9,12 @@ type Props = {
 };
 
 export default function ReminderItem({reminder, today}: Props) {
-	const isToday = reminder.dueDate === today;
-	const isOverdue = reminder.dueDate < today;
+	const status = formatDueDate(reminder.dueDate, today);
 	const color = reminder.complete
 		? 'gray'
-		: isOverdue
+		: status === 'overdue'
 		? 'red'
-		: isToday
+		: status === 'today'
 		? 'yellow'
 		: 'white';
 

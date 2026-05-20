@@ -12,11 +12,10 @@ export default function App() {
 	const {stdout} = useStdout();
 	const todayDate = getToday();
 
-	const {reminders, remindersRef, sorted, addReminder, completeReminder} =
-		useReminders();
+	const {remindersRef, sorted, addReminder, completeReminder} = useReminders();
 
 	const [output, setOutput] = useState('');
-	const [outputError, setOutputError] = useState<string | undefined>(undefined);
+	const [outputError, setOutputError] = useState<string>();
 	const [isGenerating, setIsGenerating] = useState(false);
 	const [input, setInput] = useState('');
 
@@ -35,13 +34,13 @@ export default function App() {
 	useInput(
 		(char, key) => {
 			if (key.return) {
-				if (!input.trim() || isGenerating) return;
 				const prompt = input.trim();
+				if (!prompt || isGenerating) return;
 				setInput('');
 				setOutput('');
 				setOutputError(undefined);
 				setIsGenerating(true);
-				(async () => {
+				void (async () => {
 					try {
 						await run(prompt);
 					} catch (error: unknown) {
